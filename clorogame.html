@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色弱遊戲</title>
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .container {
+        width: 100%;
+        height: 100vh;
+        background-color: bisque;
+        position: relative;
+    }
+
+    .game-box {
+        width: 540px;
+        height: 540px;
+        padding: 10px;
+        border: 1px solid black;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: Space-between;
+        border-radius: 30px;
+    }
+
+    .box {
+        width: 250px;
+        height: 250px;
+        background-color: blue;
+        /* border: 1px solid black; */
+        border-radius: 30px;
+    }
+
+    .box.answer {
+        background-color: aqua;
+    }
+
+    .score-board {
+        position: absolute;
+        top: 150px;
+        left: 700px;
+        background-color: white;
+        padding: 10px;
+        border-radius: 30px;
+    }
+
+    .time-board {
+        width: 200px;
+        position: absolute;
+        top: 150px;
+        left: 850px;
+        text-align: center;
+        background-color: white;
+        border-radius: 30px;
+    }
+
+    .none {
+        display: none;
+    }
+
+    .pass {
+        width: 540px;
+        height: 540px;
+        padding: 10px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: black;
+        z-index: 1;
+        border-radius: 30px;
+    }
+</style>
+
+
+<body>
+    <div class="container">
+        <div class="pass"></div>
+        <div class="game-box">
+            <div class="box answer"></div>
+            <div class="box"></div>
+            <div class="box"></div>
+            <div class="box"></div>
+        </div>
+        <div class="score-board">得分:0分</div>
+        <div class="time-board">
+            <div class="time"></div>
+            <button class="star">開始計時</button>
+            <button class="stop">停止計時</button>
+            <button class="re">重新開始</button>
+        </div>
+    </div>
+
+    <script>
+        // 誰 甚麼時候 要幹嘛
+        const board = document.querySelector('.game-box');
+        const scoreBoard = document.querySelector('.score-board');
+        const timeBoard = document.querySelector('.time');
+        const starBtn = document.querySelector('.star');
+        const stopBtn = document.querySelector('.stop');
+        const reBtn = document.querySelector('.re')
+        const passScreen = document.querySelector('.pass')
+
+        timeBoard.innerHTML = '60s';
+        
+        // 分數
+        let score = 0;
+        let count = 0;
+        // 計時
+        let time = 60;
+        let timer;
+
+        // 點擊國防部會彈出想作弊阿
+        passScreen.addEventListener('click' ,function(){
+            alert('想作弊R')
+        })
+
+        // 評價等級判斷
+        function Evaluation() {
+                if (score < 10) {
+                    return '不太行哦';
+                } else if (score >= 10 && score < 20) {
+                    return '還不錯哦';
+                }
+                else if (score >= 20 && score < 30) {
+                    return '很強了';
+                }
+                else if (score >= 30 && score < 45) {
+                    return '有才能的人';
+                }
+                else {
+                    return '天才';
+                }
+
+            };
+
+        // 開始按鈕
+        starBtn.addEventListener('click',function(){
+            // starBtn增加none stopBtn取消none (starBtn消失 stopBtn出現)
+            starBtn.classList.add('none');
+            stopBtn.classList.remove('none');
+            // 取消國防部
+            passScreen.classList.add('none')
+
+            timer = setInterval(function(){
+                if(time > 0){
+                    time--;
+                    console.log(time);
+                }else{
+                    clearInterval(timer);
+                    alert(`遊戲時間到瞜!分數:${score},評等:${Evaluation()}`)
+                    passScreen.classList.remove('none')
+                    stopBtn.classList.add('none')
+                }
+                // 顯示time
+                timeBoard.innerHTML = `${time}`;
+            },1000);
+        })
+        // 暫停按鈕
+        stopBtn.addEventListener('click',function(){
+            // starBtn取消none stopBtn增加none (starBtn出現 starBtn消失)
+            starBtn.classList.remove('none')
+            stopBtn.classList.add('none')
+            // 出現國防部
+            passScreen.classList.remove('none')
+            // 時間暫停
+            clearInterval(timer);
+        })
+        // 重新按鈕
+        reBtn.addEventListener('click',function(){
+            // 重置網頁
+            location.reload();
+        })
+
+        
+        // level: 等級(難度)
+        function setBoard(level) {
+            // 0~3
+            let random = Math.floor(Math.random() * (level + 1) * (level + 1));
+            // 0~254
+            let r = Math.floor(Math.random() * 255);
+            let G = Math.floor(Math.random() * 255);
+            let B = Math.floor(Math.random() * 255);
+
+            let sideLength = (520 - 5 * level) / (level + 1);
+
+            board.innerHTML = '';
+            for (let i = 0; i < (level + 1) * (level + 1); i++) {
+                if (random == i) {
+                    board.innerHTML += `<div class="box answer" style="background-color: rgba(${r},${G},${B},0.8); width: ${sideLength}px; height: ${sideLength}px;"><div>`;
+                } else {
+                    board.innerHTML += `<div class="box" style="background-color: rgba(${r},${G},${B},1); width: ${sideLength}px; height: ${sideLength}px;"></div>`
+                }
+            }
+            
+            // 每一次進入function 就先宣告找出所有box
+            let boxes = document.querySelectorAll('.box');
+
+            boxes.forEach(function (box) {
+                // 每個box都綁上事件
+                box.addEventListener('click', function () {
+                    console.log('點擊測試');
+                    // 如果點到正解
+                    if (box.classList.contains('answer')) {
+                        score = score + 1;
+                        count += 1 ;
+                        console.log(count);
+                        // 遞回函數 重新宣告所有box 重新綁定事件
+                        if (count % 3 == 0 && level < 8) {
+                            count = 0;
+                            // score 為3的倍數時 等級提升
+                            setBoard(level + 1);
+                        }
+                        else {
+                            setBoard(level);
+                        }
+
+                    } else {
+                        count = 0;
+                        // 如果score 大於0 才能扣分
+                        if (score > 0) {
+                            score = score - 1;
+                        }
+                        alert('-1');
+                    }
+                    scoreBoard.innerHTML = `得分:${score}分`;
+                })
+            })
+        }
+        // 第一次啟用function 讓box
+        setBoard(1);
+    </script>
+</body>
+
+</html>
